@@ -77,8 +77,7 @@ def upload():
                 if len(str(cell.value)) > max_length:
                     max_length = len(cell.value)
             except:
-                pass
-        adjusted_width = (max_length + 2)
+                passadjusted_width = (max_length + 2)
         new_sheet.column_dimensions[column].width = adjusted_width
         for cell in col:
             cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
@@ -89,8 +88,42 @@ def upload():
 
     return '''
         <html>
+            <head>
+                <style>
+                
+                    .center {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                    }
+                    .button {
+                        background-color: #4CAF50;
+                        border: none;
+                        color: white;
+                        padding: 15px 32px;
+                        text-align: center;
+                        text-decoration: none;
+                        display: inline-block;
+                        font-size: 16px;
+                    }
+                    .button:hover {
+                        background-color: white;
+                        color: #4CAF50;
+                        border: 2px solid #4CAF50;
+                    }
+                    .center {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh !important;
+                    }
+                </style>
+            </head>
             <body>
-                <a href="/download/{}">Download</a>
+                <div class="center">
+                    <a href="/download/{}" class="button">Download</a>
+                </div>
             </body>
         </html>
     '''.format(filename)
