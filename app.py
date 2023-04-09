@@ -1,26 +1,31 @@
 from flask import Flask, request, send_file
 import openpyxl
 from openpyxl.styles import Alignment, Border, Side, PatternFill
-import io
+import os
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     return '''
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="file">
-            <input type="submit" value="Upload">
-        </form>
-        <br>
-        <a href="/download">Download Processed File</a>
+        <html>
+            <body>
+                <form action="/upload" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file">
+                    <input type="submit" value="Upload">
+                </form>
+            </body>
+        </html>
     '''
 
 @app.route('/upload', methods=['POST'])
 def upload():
     file = request.files['file']
-    # Load the workbook from the uploaded file
-    wb = openpyxl.load_workbook(file)
+    filename = file.filename
+    file.save(filename)
+
+    # Open the Excel file and select the appropriate sheet
+    wb = openpyxl.load_workbook(filename)
     sheet = wb['Sheet1']
 
     # Create a new sheet to hold the extracted data
@@ -43,7 +48,6 @@ def upload():
 
     # Loop through each row in the original sheet
     for row in range(2, 101):
-
         # Check if any of the violation columns have a value greater than 0
         has_violation = False
         violation_types = []
@@ -56,36 +60,44 @@ def upload():
         # If a violation was found, write the name and violation types to the new sheet
         if has_violation:
             new_row += 1
-            new_sheet.cell(row=new_row, column=new_col).border = thin_border
-            new_sheet.cell(row=new_row, column=new_col).alignment = Alignment(horizontal='center')
-            new_sheet.cell(row=new_row, column=new_col).value = sheet.cell(row=row, column=1).value
+            new_sheet.cell(row=new_row, column=new_col, value=sheet.cell(row=row, column=1).value).border = thin_border
+            new_sheet.cell(row=new_row, column=new_col+1, value=', '.join(violation_types)).border = thin_border
 
-            new_sheet.cell(row=new_row, column=new_col+1).border = thin_border
-            new_sheet.cell(row=new_row, column=new_col+1).alignment = Alignment(horizontal='center')
-            new_sheet.cell(row=new_row, column=new_col+1).value = ', '.join(violation_types)
+        # Sum the violation values and write the total to the new sheet
+        violation_sum = sum(sheet.cell(row=row, column=col).value for col in range(3, 11) if sheet.cell(row=row, column=col).value is not None)
+        if violation_sum > 0:
+            new_sheet.cell(row=new_row, column=new_col+2, value=violation_sum).border = thin_border
 
-            new_sheet.cell(row=new_row, column=new_col+2).border = thin_border
-            new_sheet.cell(row=new_row, column=new_col+2).alignment = Alignment(horizontal='center')
-            new_sheet.cell(row=new_row, column=new_col+2).value = len(violation_types)
+    # Apply formatting to all cells in new sheet
+    for col in new_sheet.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        new_sheet.column_dimensions[column].width = adjusted_width
+        for cell in col:
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            cell.border = thin_border
 
-    # Save the modified workbook to a temporary file-like object in memory
-    output_file = io.BytesIO()
-    wb.save(output_file)
-    output_file.seek(0)
+    # Save the updated Excel file
+    wb.save(filename)
 
-    # Return the modified workbook as a downloadable file
-    return send_file(output_file,
-                     attachment_filename='modified.xlsx',
-                     as_attachment=True)
+    return '''
+        <html>
+            <body>
+                <a href="/download/{}">Download</a>
+            </body>
+        </html>
+    '''.format(filename)
 
-@app.route('/download')
-def download():
-    # Return the processed file as a downloadable file
-    return send_file('path/to/processed/file.xlsx',
-                     attachment_filename='processed.xlsx',
-                     as_attachment=True)
+@app.route('/download/<filename>')
+def download(filename):
+    return send_file(filename)
 
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run()
