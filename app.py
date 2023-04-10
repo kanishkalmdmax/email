@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, send_file
+from flask import Flask, request, send_file
 import openpyxl
 from openpyxl.styles import Alignment, Border, Side, PatternFill
 import os
@@ -105,31 +105,12 @@ def upload():
 
     return '''
         <html>
-            <head>
-                <title>Netradyne E-Mail</title>
-                <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-                <style>
-                    .download-btn {
-                        font-size: 16px;
-                        width: 104px;
-                        height: 54px;
-                        display: inline-block;
-                        text-align: center;
-                        line-height: 54px;
-                        background-color: #007bff;
-                        color: #fff;
-                        border-radius: 5px;
-                    }
-                </style>
-            </head>
+        <title>Netradyne E-Mail</title>
             <body>
-                <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
-                    <a href="/download/{}" class="download-btn">Download</a>
-                </div>
+                <a href="/download/{}">Download</a>
             </body>
         </html>
     '''.format(filename)
-
 
 @app.route('/download/<filename>')
 def download(filename):
