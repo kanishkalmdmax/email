@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, redirect, send_file
 import openpyxl
 from openpyxl.styles import Alignment, Border, Side, PatternFill
 import os
@@ -9,11 +9,27 @@ app = Flask(__name__)
 def index():
     return '''
         <html>
+            <head>
+                <title>Netradyne E-Mail</title>
+                <style>
+                    #instructions {
+                        border: 1px solid black;
+                        padding: 10px;
+                        position: absolute;
+                        top: 50%;
+                        right: 10px;
+                        transform: translateY(-50%);
+                    }
+                </style>
+            </head>
             <body>
                 <form action="/upload" method="post" enctype="multipart/form-data">
                     <input type="file" name="file">
                     <input type="submit" value="Upload">
                 </form>
+                <div id="instructions">
+                    Steps:<br>(Upload Reports in the Performance App first)<br>1. Open Performance App, then select Reports and then Driver Report.<br>2. Click on the Daily button and select yesterday's date, then toggle the Summary option and click Download.<br>3. Once the file is downloaded, open this URL, click on Choose File, select the file, and click Upload.<br>4. Then a new page will open with the Download button, click on that and download the file.<br>5. Open the file, it'll be the same file, with a new sheet added with the name of "Extracted Data", open that sheet.<br>6. This sheet will have the email grid, you can copy this grid and paste it in the email.
+                </div>
             </body>
         </html>
     '''
@@ -89,11 +105,31 @@ def upload():
 
     return '''
         <html>
+            <head>
+                <title>Netradyne E-Mail</title>
+                <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+                <style>
+                    .download-btn {
+                        font-size: 16px;
+                        width: 104px;
+                        height: 54px;
+                        display: inline-block;
+                        text-align: center;
+                        line-height: 54px;
+                        background-color: #007bff;
+                        color: #fff;
+                        border-radius: 5px;
+                    }
+                </style>
+            </head>
             <body>
-                <a href="/download/{}">Download</a>
+                <div class="d-flex align-items-center justify-content-center" style="height: 100vh;">
+                    <a href="/download/{}" class="download-btn">Download</a>
+                </div>
             </body>
         </html>
     '''.format(filename)
+
 
 @app.route('/download/<filename>')
 def download(filename):
