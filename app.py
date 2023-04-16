@@ -101,6 +101,18 @@ def upload():
     # Filter the rows based on the condition
     df = df[(df['Following Distance'] > 0) | (df['Camera Obstruction'] > 0) | (df['U Turn'] > 0) | (df['Driver Distraction'] > 0) | (df['Seatbelt Compliance'] > 0) | (df['Sign Violations'] > 0) | (df['Speeding Violations'] > 0) | (df['Traffic Light Violation'] > 0)]
 
+    # Group the rows by Name and merge the data
+    df = df.groupby('Name').agg({
+        'Following Distance': 'sum',
+        'Camera Obstruction': 'sum',
+        'U Turn': 'sum',
+        'Driver Distraction': 'sum',
+        'Seatbelt Compliance': 'sum',
+        'Sign Violations': 'sum',
+        'Speeding Violations': 'sum',
+        'Traffic Light Violation': 'sum'
+    }).reset_index()
+
     # Create a new column for Violations
     df['Violations'] = df[columns[1:]].apply(lambda x: ', '.join(x[x>0].index), axis=1)
 
