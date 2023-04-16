@@ -3,3 +3,4 @@ openpyxl
 gitpython
 flask
 gunicorn
+werkzeug.utils
