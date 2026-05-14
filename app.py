@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 DEFAULT_COLUMNS = ['Following Distance', 'Camera Obstruction', 'U Turn', 'Driver Distraction', 'Seatbelt Compliance', 'Sign Violations', 'Speeding Violations', 'Traffic Light Violation']
 HARSH_HANDLING_COLUMNS = ['Hard Braking', 'Hard Turn', 'Hard Acceleration']
-ADDITIONAL_COLUMNS = ['High G', 'Low Impact', 'Driver Initiated', 'Potential Collision', 'Weaving', 'Backing']
+ADDITIONAL_COLUMNS = ['High - G', 'Low Impact', 'Driver Initiated', 'Potential Collision', 'Weaving', 'Backing', 'Driver Drowsiness', 'Collision Warning', 'Cabin Object', 'Roadside Parking', 'Lane Conduct']
 ALL_COLUMNS = DEFAULT_COLUMNS + HARSH_HANDLING_COLUMNS + ADDITIONAL_COLUMNS + ['Driver Name', 'Name']
 
 UPLOAD_FORM_HTML = """
